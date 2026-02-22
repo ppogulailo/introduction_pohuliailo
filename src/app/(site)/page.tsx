@@ -30,13 +30,13 @@ const featuredProjects = projects.slice(0, 3);
 export default function IndexPage() {
   return (
     <>
-      <section className="relative overflow-hidden py-28 sm:py-36 lg:py-44">
+      <section className="relative overflow-hidden py-24 sm:py-32 lg:py-40">
         <div className="hero-haze -top-20 -right-40 h-80 w-80 bg-primary/20" />
         <div className="hero-haze top-40 -left-32 h-64 w-64 bg-accent/40" />
 
         <Container>
-          <div className="flex flex-col items-center gap-14 lg:flex-row lg:items-center lg:justify-between">
-            <div className="max-w-2xl flex-1">
+          <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-12">
+            <div className="lg:col-span-5">
               <Reveal>
                 <p className="mb-4 text-xs font-medium uppercase tracking-[0.2em] text-primary">Senior Software Engineer - Kyiv</p>
               </Reveal>
@@ -66,23 +66,33 @@ export default function IndexPage() {
               </Reveal>
             </div>
 
-            <Reveal delay={200}>
-              <div className="relative shrink-0">
-                <div className="h-72 w-60 overflow-hidden rounded-2xl bg-muted shadow-2xl shadow-foreground/5 sm:h-80 sm:w-64 lg:h-[400px] lg:w-[320px]">
-                  <div className="flex h-full items-center justify-center text-muted-foreground">Profile</div>
+            <div className="lg:col-span-7">
+              <Reveal delay={200}>
+                <div className="relative w-full">
+                  <div className="aspect-video overflow-hidden rounded-[20px] border border-border/60 shadow-2xl shadow-foreground/5">
+                  <iframe
+                    src="https://www.youtube.com/embed/e9pvT5_ZZ3M"
+                    title="Introduction video"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    className="h-full w-full border-0"
+                    loading="lazy"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allowFullScreen
+                  />
+                  </div>
+                  <span className="absolute -bottom-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-border bg-card px-4 py-1.5 text-xs font-medium text-primary shadow-sm">
+                    Open to work
+                  </span>
                 </div>
-                <span className="absolute -bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-border bg-card px-4 py-1.5 text-xs font-medium text-primary shadow-sm">
-                  Open to work
-                </span>
-              </div>
-            </Reveal>
+              </Reveal>
+            </div>
           </div>
         </Container>
       </section>
 
       <div className="section-divider mx-auto max-w-[1200px]" />
 
-      <section className="py-20 sm:py-24">
+      <section className="py-20 sm:py-24 section-warm">
         <Container>
           <Reveal>
             <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">

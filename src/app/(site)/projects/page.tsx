@@ -2,15 +2,27 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import Container from "@/components/layout/Container";
 import SectionHeading from "@/components/SectionHeading";
 import Tag from "@/components/Tag";
 import Reveal from "@/components/Reveal";
 import { allTags, projects } from "@/data/projects";
 
+const PER_PAGE = 10;
+
 export default function ProjectsPage() {
   const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
   const filtered = activeTag ? projects.filter((p) => p.tags.includes(activeTag)) : projects;
+  const totalPages = Math.ceil(filtered.length / PER_PAGE);
+  const showPagination = filtered.length > PER_PAGE;
+  const paginated = showPagination ? filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE) : filtered;
+
+  const handleTagChange = (tag: string | null) => {
+    setActiveTag(tag);
+    setPage(1);
+  };
 
   return (
     <section className="py-24 sm:py-32">
@@ -21,20 +33,20 @@ export default function ProjectsPage() {
 
         <Reveal delay={40}>
           <div className="mb-10 flex flex-wrap gap-2">
-            <Tag label="All" active={!activeTag} onClick={() => setActiveTag(null)} />
+            <Tag label="All" active={!activeTag} onClick={() => handleTagChange(null)} />
             {allTags.map((tag) => (
-              <Tag key={tag} label={tag} active={activeTag === tag} onClick={() => setActiveTag(tag)} />
+              <Tag key={tag} label={tag} active={activeTag === tag} onClick={() => handleTagChange(tag)} />
             ))}
           </div>
         </Reveal>
 
         <div className="grid gap-8 sm:grid-cols-2">
-          {filtered.map((project, i) => (
+          {paginated.map((project, i) => (
             <Reveal key={project.slug} delay={i * 60}>
               <Link href={`/projects/${project.slug}`} className="group block">
                 <div className="card-hover overflow-hidden rounded-2xl border border-border bg-card">
-                  <div className="flex aspect-[16/10] items-center justify-center bg-muted/50">
-                    <span className="text-7xl font-semibold text-muted-foreground/8">{String(i + 1).padStart(2, "0")}</span>
+                  <div className="flex aspect-16/10 items-center justify-center bg-muted/50">
+                    <span className="text-7xl font-semibold text-muted-foreground/8">{String((page - 1) * PER_PAGE + i + 1).padStart(2, "0")}</span>
                   </div>
                   <div className="p-7">
                     <div className="flex items-center justify-between">
@@ -54,6 +66,40 @@ export default function ProjectsPage() {
             </Reveal>
           ))}
         </div>
+
+        {showPagination && (
+          <div className="mt-12 flex items-center justify-center gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              aria-label="Previous page"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-30"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+              <button
+                key={p}
+                onClick={() => setPage(p)}
+                className={`flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium transition-colors ${
+                  p === page
+                    ? "bg-foreground text-background"
+                    : "border border-border text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
+              >
+                {p}
+              </button>
+            ))}
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              aria-label="Next page"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-30"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        )}
       </Container>
     </section>
   );

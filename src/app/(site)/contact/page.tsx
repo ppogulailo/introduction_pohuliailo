@@ -2,35 +2,75 @@
 
 import { FormEvent, useState } from "react";
 import { ArrowRight, Github, Linkedin, Mail } from "lucide-react";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import Container from "@/components/layout/Container";
 import SectionHeading from "@/components/SectionHeading";
 import Reveal from "@/components/Reveal";
 
 export default function ContactPage() {
-  const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const { executeRecaptcha } = useGoogleReCaptcha();
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    project: "",
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const validate = () => {
     const e: Record<string, string> = {};
     if (!form.name.trim()) e.name = "Name is required.";
     if (!form.email.trim()) e.email = "Email is required.";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "Enter a valid email.";
-    if (!form.message.trim()) e.message = "Message is required.";
-    else if (form.message.length > 1000) e.message = "Message must be under 1000 characters.";
+    if (!form.project.trim()) e.project = "Project details are required.";
+    else if (form.project.length > 3000) e.project = "Project details must be under 3000 characters.";
     return e;
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const errs = validate();
     setErrors(errs);
-    if (Object.keys(errs).length === 0) setSubmitted(true);
+    if (Object.keys(errs).length > 0) return;
+
+    if (!executeRecaptcha) {
+      setSubmitError("Security check is not ready yet. Please try again in a moment.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitError("");
+
+    try {
+      const token = await executeRecaptcha("contact_form_submit");
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...form,
+          token,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({ error: "Failed to send request." }));
+        throw new Error(data.error || "Failed to send request.");
+      }
+
+      setSubmitted(true);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
+    if (submitError) setSubmitError("");
   };
 
   const inputClass =
@@ -52,7 +92,7 @@ export default function ContactPage() {
                   <p className="mt-3 text-sm text-muted-foreground">Your message has been received. I&apos;ll get back to you within 1-2 business days.</p>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+                  <form onSubmit={handleSubmit} className="space-y-6" noValidate>
                   <div>
                     <label htmlFor="name" className="mb-2 block text-xs font-medium uppercase tracking-[0.15em] text-muted-foreground">Name</label>
                     <input id="name" type="text" value={form.name} onChange={(e) => handleChange("name", e.target.value)} className={inputClass} placeholder="Your name" maxLength={100} />
@@ -64,13 +104,14 @@ export default function ContactPage() {
                     {errors.email && <p className="mt-1.5 text-xs text-destructive">{errors.email}</p>}
                   </div>
                   <div>
-                    <label htmlFor="message" className="mb-2 block text-xs font-medium uppercase tracking-[0.15em] text-muted-foreground">Message</label>
-                    <textarea id="message" rows={5} value={form.message} onChange={(e) => handleChange("message", e.target.value)} className={`${inputClass} resize-none`} placeholder="Tell me about your project…" maxLength={1000} />
-                    {errors.message && <p className="mt-1.5 text-xs text-destructive">{errors.message}</p>}
-                  </div>
-                  <button type="submit" className="btn-hover inline-flex items-center gap-2 rounded-full bg-foreground px-7 py-3.5 text-sm font-medium text-background">
-                    Send message <ArrowRight className="h-4 w-4" />
-                  </button>
+                      <label htmlFor="project" className="mb-2 block text-xs font-medium uppercase tracking-[0.15em] text-muted-foreground">Project</label>
+                      <textarea id="project" rows={6} value={form.project} onChange={(e) => handleChange("project", e.target.value)} className={`${inputClass} resize-none`} placeholder="Tell me about your project..." maxLength={3000} />
+                      {errors.project && <p className="mt-1.5 text-xs text-destructive">{errors.project}</p>}
+                    </div>
+                    {submitError && <p className="text-xs text-destructive">{submitError}</p>}
+                    <button type="submit" disabled={isSubmitting} className="btn-hover inline-flex items-center gap-2 rounded-full bg-foreground px-7 py-3.5 text-sm font-medium text-background disabled:cursor-not-allowed disabled:opacity-70">
+                      {isSubmitting ? "Sending..." : "Send message"} <ArrowRight className="h-4 w-4" />
+                    </button>
                 </form>
               )}
             </div>

@@ -12,6 +12,7 @@ const navItems = [
   { label: "About", path: "/about" },
   { label: "Projects", path: "/projects" },
   { label: "Services", path: "/services" },
+  { label: "AI Chatbot", path: "/ai-chatbot" },
 ];
 
 const Header = () => {
@@ -31,10 +32,16 @@ const Header = () => {
 
   return (
     <>
-      <header className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? "border-b border-border/60 bg-background/85 backdrop-blur-lg" : "bg-transparent"}`}>
+      <header
+        className={`sticky top-0 z-50 transition-all duration-300 section-warm ${
+          scrolled
+            ? "border-b border-border bg-background/90 backdrop-blur-xl shadow-sm shadow-foreground/3"
+            : "border-b border-transparent bg-transparent"
+        }`}
+      >
         <Container className="flex h-20 items-center justify-between">
           <Link href="/" className="text-xl font-semibold tracking-tight text-foreground" style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 700 }}>
-            Person_Name
+            Pavlo Pohuliailo
           </Link>
 
           <nav className="hidden items-center gap-1 sm:flex" aria-label="Main navigation">
@@ -60,7 +67,7 @@ const Header = () => {
       </header>
 
       {mobileOpen && (
-        <div className="fixed inset-0 z-[100] flex flex-col bg-background">
+        <div className="fixed inset-0 z-100 flex flex-col bg-background">
           <Container className="flex h-20 items-center justify-between">
             <Link
               href="/"

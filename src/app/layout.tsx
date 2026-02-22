@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { ReactQueryProvider } from "@/providers/react-query-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
+import ReCaptchaWrapper from "@/components/ReCaptchaWrapper";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -30,12 +31,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider>
-          <ReactQueryProvider>
-            {children}
-            <Toaster richColors closeButton position="top-right" />
-          </ReactQueryProvider>
-        </ThemeProvider>
+        <ReCaptchaWrapper>
+          <ThemeProvider>
+            <ReactQueryProvider>
+              {children}
+              <Toaster richColors closeButton position="top-right" />
+            </ReactQueryProvider>
+          </ThemeProvider>
+        </ReCaptchaWrapper>
       </body>
     </html>
   );

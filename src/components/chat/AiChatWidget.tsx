@@ -1,35 +1,138 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { AlertTriangle, MessageSquare, MessageSquarePlus, Minimize2, Trash2, Volume2, VolumeX, X } from "lucide-react";
+import { useState, useCallback, useRef, useEffect } from "react";
+import { AlertTriangle, GripVertical, MessageSquare, MessageSquarePlus, Minimize2, Trash2, Volume2, VolumeX, X } from "lucide-react";
 import { CHAT_CONFIG } from "./chat-config";
-import { useChat } from "./useChat";
+import { useSharedChat } from "./chat-state-context";
 import ChatMessages from "./ChatMessages";
 import ChatComposer from "./ChatComposer";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useChatContext } from "@/hooks/useChatContext";
+
+const SIZE_KEY = "ai-chat-size";
+
+function loadSize(): { w: number; h: number } | null {
+  try {
+    const raw = localStorage.getItem(SIZE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return null;
+}
+
+function saveSize(w: number, h: number) {
+  localStorage.setItem(SIZE_KEY, JSON.stringify({ w, h }));
+}
+
+function clamp(val: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, val));
+}
+
+const DEFAULT_W = 380;
+const DEFAULT_H = 520;
+const MIN_W = 320;
+const MIN_H = 420;
+const MAX_W = 720;
+const MAX_H_RATIO = 0.8;
 
 export const AiChatWidget = () => {
-  const chat = useChat();
+  const chat = useSharedChat();
+  const ctx = useChatContext();
   const isMobile = useIsMobile();
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (ctx.isOpen && !chat.isOpen) {
+      chat.setOpen(true);
+    }
+    if (!ctx.isOpen && chat.isOpen) {
+      chat.setOpen(false);
+    }
+  }, [ctx.isOpen]);
+
+  useEffect(() => {
+    if (!chat.isOpen && ctx.isOpen) {
+      ctx.setOpen(false);
+    }
+  }, [chat.isOpen]);
+
+  useEffect(() => {
+    if (ctx.shouldFocus && ctx.isOpen) {
+      ctx.clearFocus();
+      setTimeout(() => {
+        const ta = panelRef.current?.querySelector("textarea");
+        ta?.focus();
+      }, 300);
+    }
+  }, [ctx.shouldFocus, ctx.isOpen]);
+
+  const saved = loadSize();
+  const [size, setSize] = useState({ w: saved?.w ?? DEFAULT_W, h: saved?.h ?? DEFAULT_H });
+  const resizing = useRef(false);
+  const startPos = useRef({ x: 0, y: 0, w: 0, h: 0 });
+
+  const onResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    resizing.current = true;
+    startPos.current = { x: e.clientX, y: e.clientY, w: size.w, h: size.h };
+
+    const onMove = (ev: MouseEvent) => {
+      if (!resizing.current) return;
+      const dw = startPos.current.x - ev.clientX;
+      const dh = startPos.current.y - ev.clientY;
+      const maxW = Math.min(MAX_W, window.innerWidth * 0.9);
+      const maxH = window.innerHeight * MAX_H_RATIO;
+      const newW = clamp(startPos.current.w + dw, MIN_W, maxW);
+      const newH = clamp(startPos.current.h + dh, MIN_H, maxH);
+      setSize({ w: newW, h: newH });
+    };
+
+    const onUp = () => {
+      resizing.current = false;
+      setSize((s) => {
+        saveSize(s.w, s.h);
+        return s;
+      });
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  }, [size]);
+
+  useEffect(() => {
     if (!chat.isOpen) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") chat.setOpen(false);
+      if (e.key === "Escape") {
+        chat.setOpen(false);
+        ctx.setOpen(false);
+      }
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [chat.isOpen, chat.setOpen]);
+  }, [chat.isOpen]);
 
   useEffect(() => {
     if (chat.isOpen && panelRef.current) panelRef.current.focus();
   }, [chat.isOpen]);
 
+  const handleClose = () => {
+    chat.setOpen(false);
+    ctx.setOpen(false);
+  };
+
+  const handleLauncherClick = () => {
+    if (ctx.isOpen) {
+      handleClose();
+    } else {
+      ctx.openAndFocus();
+    }
+  };
+
   return (
     <>
-      {chat.isOpen && isMobile && <div className="fixed inset-0 z-[60] animate-in fade-in-0 bg-foreground/10 backdrop-blur-sm duration-200" onClick={() => chat.setOpen(false)} aria-hidden />}
+      {chat.isOpen && isMobile && <div className="fixed inset-0 z-60 animate-in fade-in-0 bg-foreground/10 backdrop-blur-sm duration-200" onClick={handleClose} aria-hidden />}
 
       {chat.isOpen && (
         <div
@@ -37,19 +140,31 @@ export const AiChatWidget = () => {
           tabIndex={-1}
           role="dialog"
           aria-label="AI Chat"
+          style={isMobile ? undefined : { width: `${size.w}px`, height: `${size.h}px` }}
           className={cn(
-            "fixed z-[70] flex flex-col overflow-hidden border border-border bg-card shadow-xl",
+            "fixed z-70 flex flex-col overflow-hidden border border-border bg-card shadow-xl",
             "animate-in slide-in-from-bottom-4 fade-in-0 duration-200",
-            isMobile ? "inset-0 rounded-none" : "bottom-24 right-6 h-[520px] w-[380px] rounded-2xl"
+            isMobile ? "inset-0 rounded-none" : "right-6 bottom-24 rounded-2xl"
           )}
         >
+          {!isMobile && (
+            <div
+              onMouseDown={onResizeStart}
+              className="absolute top-0 left-0 z-10 flex h-8 w-8 cursor-nw-resize items-center justify-center text-muted-foreground/40 transition-colors hover:text-muted-foreground"
+              aria-label="Resize chat window"
+              title="Drag to resize"
+            >
+              <GripVertical className="h-3.5 w-3.5 -rotate-45" />
+            </div>
+          )}
+
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <div className="min-w-0">
-              <h2 className="text-sm font-semibold text-foreground">{CHAT_CONFIG.title}</h2>
+              <h2 className="text-sm font-semibold text-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>{CHAT_CONFIG.title}</h2>
               <p className="truncate text-xs text-muted-foreground">{CHAT_CONFIG.subtitle}</p>
             </div>
             <div className="flex items-center gap-1">
-              <button onClick={chat.toggleTts} aria-label={chat.ttsEnabled ? "Disable read aloud" : "Enable read aloud"} className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground" title={chat.ttsEnabled ? "TTS on" : "TTS off"}>
+              <button onClick={chat.toggleTts} aria-label={chat.ttsEnabled ? "Disable read aloud" : "Enable read aloud"} className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground">
                 {chat.ttsEnabled ? <Volume2 className="h-3.5 w-3.5" /> : <VolumeX className="h-3.5 w-3.5" />}
               </button>
               <button onClick={chat.startNewChat} aria-label="Start new chat" className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground">
@@ -59,11 +174,11 @@ export const AiChatWidget = () => {
                 <Trash2 className="h-3.5 w-3.5" />
               </button>
               {!isMobile && (
-                <button onClick={() => chat.setOpen(false)} aria-label="Minimize chat" className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground">
+                <button onClick={handleClose} aria-label="Minimize chat" className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground">
                   <Minimize2 className="h-3.5 w-3.5" />
                 </button>
               )}
-              <button onClick={() => chat.setOpen(false)} aria-label="Close chat" className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground">
+              <button onClick={handleClose} aria-label="Close chat" className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground">
                 <X className="h-3.5 w-3.5" />
               </button>
             </div>
@@ -101,7 +216,7 @@ export const AiChatWidget = () => {
       {!chat.isOpen && (
         <div className="animate-in slide-in-from-bottom-2 fade-in-0 duration-300">
           <button
-            onClick={chat.toggleOpen}
+            onClick={handleLauncherClick}
             aria-label="Open AI chat"
             className={cn(
               "fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full",
