@@ -1,37 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# introduction_pohuliailo
 
-## Getting Started
+Portfolio website for **Pavlo Pohuliailo** built with Next.js (App Router), featuring project case studies, AI chat, contact form with reCAPTCHA + SES, and theme support.
 
-First, run the development server:
+## What is included
+
+- Marketing pages: Home, About, Services, Contact, Privacy.
+- Projects list with filters and pagination (10 items per page).
+- Project detail pages with image carousel and full-screen lightbox.
+- AI Chat:
+  - floating chat widget (all pages except `/ai-chatbot`)
+  - dedicated `/ai-chatbot` page
+  - shared state between widget and page
+  - optional voice read-aloud (TTS) toggle
+- Cookie consent modal with persistent choice and footer settings trigger.
+- Contact form posting to `/api/contact` with:
+  - Google reCAPTCHA v3 validation
+  - AWS SES email delivery
+
+## Tech stack
+
+- Next.js 16 (App Router)
+- React 18 + TypeScript
+- Tailwind CSS 4
+- next-themes
+- TanStack Query
+- OpenAI API (chat/tts/transcribe routes)
+- Supabase (RAG/vector search for chat)
+- AWS SES
+- Google reCAPTCHA v3
+
+## Local development
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Production build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm run start
+```
 
-## Learn More
+## Environment variables
 
-To learn more about Next.js, take a look at the following resources:
+Create `.env` with the required keys:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+# OpenAI / AI routes
+OPENAI_API_KEY=
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Supabase (for /api/chat retrieval)
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
 
-## Deploy on Vercel
+# reCAPTCHA
+NEXT_PUBLIC_RECAPTCHA_SITE_KEY=
+RECAPTCHA_SECRET_KEY=
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# AWS SES (for /api/contact)
+AWS_REGION=
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+SES_FROM_EMAIL=
+SES_TO_EMAIL=
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# introduction_pohuliailo
+## Useful scripts
+
+- `npm run dev` — start dev server
+- `npm run build` — build production bundle
+- `npm run start` — run production server
+- `npm run lint` — run lint checks
+- `npm run ingest` — run ingestion script (`src/app/scripts/ingest.ts`)
