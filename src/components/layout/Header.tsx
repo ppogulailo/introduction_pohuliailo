@@ -75,7 +75,7 @@ const Header = () => {
               onClick={() => setMobileOpen(false)}
               aria-label="Pavlo Pohuliailo home"
             >
-              <img src={LOGO_SRC} alt="Pavlo Pohuliailo logo" className="h-10 w-auto" />
+                Pavlo Pohuliailo
             </Link>
             <button onClick={() => setMobileOpen(false)} className="flex h-10 w-10 items-center justify-center rounded-lg text-foreground" aria-label="Close menu">
               <X className="h-5 w-5" strokeWidth={1.5} />
