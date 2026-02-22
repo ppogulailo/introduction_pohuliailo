@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Briefcase, Github, Linkedin, Mail } from "lucide-react";
 import Container from "./Container";
 
 const Footer = () => {
@@ -27,6 +28,10 @@ const Footer = () => {
             </div>
             <div className="space-y-3">
               <p className="text-xs font-medium uppercase tracking-[0.15em] text-muted-foreground/60">Connect</p>
+              <a href="mailto:pavel.pogulailo@gmail.com" className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"><Mail className="h-4 w-4 shrink-0" strokeWidth={1.5} /> Email</a>
+              <a href="https://www.linkedin.com/in/pogulailopavel/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"><Linkedin className="h-4 w-4 shrink-0" strokeWidth={1.5} /> LinkedIn</a>
+              <a href="https://github.com/ppogulailo" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"><Github className="h-4 w-4 shrink-0" strokeWidth={1.5} /> GitHub</a>
+              <a href="https://www.upwork.com/freelancers/pavelp48" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"><Briefcase className="h-4 w-4 shrink-0" strokeWidth={1.5} /> Upwork</a>
               <Link href="/contact" className="block text-muted-foreground transition-colors hover:text-foreground">Contact</Link>
               <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="block text-muted-foreground transition-colors hover:text-foreground">LinkedIn</a>
               <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="block text-muted-foreground transition-colors hover:text-foreground">GitHub</a>

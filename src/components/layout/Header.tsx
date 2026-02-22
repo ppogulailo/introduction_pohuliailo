@@ -71,11 +71,11 @@ const Header = () => {
           <Container className="flex h-20 items-center justify-between">
             <Link
               href="/"
-              className="text-xl font-semibold tracking-tight text-foreground"
-              style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 700 }}
+              className="inline-flex items-center"
               onClick={() => setMobileOpen(false)}
+              aria-label="Pavlo Pohuliailo home"
             >
-              Person_Name
+              <img src={LOGO_SRC} alt="Pavlo Pohuliailo logo" className="h-10 w-auto" />
             </Link>
             <button onClick={() => setMobileOpen(false)} className="flex h-10 w-10 items-center justify-center rounded-lg text-foreground" aria-label="Close menu">
               <X className="h-5 w-5" strokeWidth={1.5} />

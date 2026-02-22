@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { ArrowRight, Github, Linkedin, Mail } from "lucide-react";
+import { ArrowRight, Briefcase, Github, Linkedin, Mail } from "lucide-react";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import Container from "@/components/layout/Container";
 import SectionHeading from "@/components/SectionHeading";
@@ -122,9 +122,10 @@ export default function ContactPage() {
               <div>
                 <p className="mb-4 text-xs font-medium uppercase tracking-[0.15em] text-muted-foreground/60">Other ways to reach me</p>
                 <div className="space-y-4">
-                  <a href="mailto:Email" className="flex items-center gap-3 text-sm text-muted-foreground transition-colors hover:text-foreground"><Mail className="h-4 w-4 shrink-0" strokeWidth={1.5} /> Email</a>
-                  <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-sm text-muted-foreground transition-colors hover:text-foreground"><Linkedin className="h-4 w-4 shrink-0" strokeWidth={1.5} /> LinkedIn</a>
-                  <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-sm text-muted-foreground transition-colors hover:text-foreground"><Github className="h-4 w-4 shrink-0" strokeWidth={1.5} /> GitHub</a>
+                  <a href="mailto:pavel.pogulailo@gmail.com" className="flex items-center gap-3 text-sm text-muted-foreground transition-colors hover:text-foreground"><Mail className="h-4 w-4 shrink-0" strokeWidth={1.5} /> pavel.pogulailo@gmail.com</a>
+                  <a href="https://www.linkedin.com/in/pogulailopavel/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-sm text-muted-foreground transition-colors hover:text-foreground"><Linkedin className="h-4 w-4 shrink-0" strokeWidth={1.5} /> LinkedIn</a>
+                  <a href="https://github.com/ppogulailo" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-sm text-muted-foreground transition-colors hover:text-foreground"><Github className="h-4 w-4 shrink-0" strokeWidth={1.5} /> GitHub</a>
+                  <a href="https://www.upwork.com/freelancers/pavelp48" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-sm text-muted-foreground transition-colors hover:text-foreground"><Briefcase className="h-4 w-4 shrink-0" strokeWidth={1.5} /> Upwork</a>
                 </div>
               </div>
               <div className="rounded-2xl border border-border bg-card p-6">

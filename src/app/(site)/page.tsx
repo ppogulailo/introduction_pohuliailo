@@ -119,8 +119,17 @@ export default function IndexPage() {
               <Reveal key={project.slug} delay={i * 80}>
                 <Link href={`/projects/${project.slug}`} className="group block">
                   <div className="card-hover overflow-hidden rounded-2xl border border-border bg-card">
-                    <div className="flex aspect-4/3 items-center justify-center bg-muted/50">
-                      <span className="text-6xl font-semibold text-muted-foreground/10">{String(i + 1).padStart(2, "0")}</span>
+                    <div className="flex aspect-4/3 items-center justify-center overflow-hidden bg-muted/50">
+                      {project.images?.[0]?.src ? (
+                        <img
+                          src={project.images[0].src}
+                          alt={project.images[0].alt || `${project.title} preview`}
+                          className="h-full w-full object-cover"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <span className="text-6xl font-semibold text-muted-foreground/10">{String(i + 1).padStart(2, "0")}</span>
+                      )}
                     </div>
                     <div className="p-6">
                       <p className="text-xs text-muted-foreground">{project.year}</p>

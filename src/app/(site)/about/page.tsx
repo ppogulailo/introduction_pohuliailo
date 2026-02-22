@@ -49,7 +49,7 @@ export default function AboutPage() {
               <Reveal delay={80}>
                 <div className="mt-8 max-w-xl space-y-4">
                   <p className="text-base leading-relaxed text-muted-foreground">
-                    I&apos;m Person_Name, a Role_Title based in Location. With over Years_Experience years of experience, I help teams and businesses build reliable, user-friendly digital products.
+                    I&apos;m Pavlo Pohuliailo, a Senior Software Engineer based in Kyiv. With over 7 years of experience, I help teams and businesses build reliable, user-friendly digital products.
                   </p>
                   <p className="text-base leading-relaxed text-muted-foreground">
                     I care deeply about clean code, thoughtful design, and creating software that genuinely serves users. I enjoy exploring tools, system design, and open-source contributions.

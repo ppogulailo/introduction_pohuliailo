@@ -45,8 +45,17 @@ export default function ProjectsPage() {
             <Reveal key={project.slug} delay={i * 60}>
               <Link href={`/projects/${project.slug}`} className="group block">
                 <div className="card-hover overflow-hidden rounded-2xl border border-border bg-card">
-                  <div className="flex aspect-16/10 items-center justify-center bg-muted/50">
-                    <span className="text-7xl font-semibold text-muted-foreground/8">{String((page - 1) * PER_PAGE + i + 1).padStart(2, "0")}</span>
+                  <div className="flex aspect-16/10 items-center justify-center overflow-hidden bg-muted/50">
+                    {project.images?.[0]?.src ? (
+                      <img
+                        src={project.images[0].src}
+                        alt={project.images[0].alt || `${project.title} preview`}
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <span className="text-7xl font-semibold text-muted-foreground/8">{String((page - 1) * PER_PAGE + i + 1).padStart(2, "0")}</span>
+                    )}
                   </div>
                   <div className="p-7">
                     <div className="flex items-center justify-between">

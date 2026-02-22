@@ -43,7 +43,7 @@ const ChatMessages = ({ messages, isLoading, ttsEnabled }: ChatMessagesProps) =>
   if (messages.length === 0 && !isLoading) {
     return (
       <div className="flex flex-1 items-center justify-center px-6 text-center text-sm text-muted-foreground">
-        <p>No messages yet. Ask me anything about Person_Name!</p>
+        <p>No messages yet. Ask me anything about Pavlo Pohuliailo!</p>
       </div>
     );
   }
