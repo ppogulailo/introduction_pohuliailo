@@ -3,7 +3,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { ChatState } from "./chat-types";
 import { loadMessages, saveMessages, clearMessages, getConversationId, newConversationId, createMessage, isFirstVisit } from "./chat-storage";
-import { ChatInputMsg, sendChatMessage, sendVoiceMessage, textToSpeech } from "./chat-api";
+import { ChatInputMsg, sendChatMessage, sendVoiceMessage, stopTextToSpeechPlayback, textToSpeech } from "./chat-api";
 
 export function useChat() {
   const [state, setState] = useState<ChatState>(() => ({
@@ -19,9 +19,11 @@ export function useChat() {
   }));
 
   const [showPulse, setShowPulse] = useState(false);
+  const [isTtsLoading, setIsTtsLoading] = useState(false);
   const recordingInterval = useRef<ReturnType<typeof setInterval> | null>(null);
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
+  const ttsEnabledRef = useRef(state.ttsEnabled);
   const [recordedAudio, setRecordedAudio] = useState<{ blob: Blob; url: string } | null>(null);
 
   useEffect(() => {
@@ -32,6 +34,10 @@ export function useChat() {
     // Avoid SSR/CSR mismatch: compute first-visit pulse after mount only.
     setShowPulse(isFirstVisit());
   }, []);
+
+  useEffect(() => {
+    ttsEnabledRef.current = state.ttsEnabled;
+  }, [state.ttsEnabled]);
 
   useEffect(() => {
     if (!showPulse) return;
@@ -63,7 +69,10 @@ export function useChat() {
       const assistantMsg = createMessage("assistant", reply);
       setState((s) => ({ ...s, messages: [...s.messages, assistantMsg], isLoading: false, unreadCount: s.isOpen ? 0 : s.unreadCount + 1 }));
       if (state.ttsEnabled) {
-        void textToSpeech(reply).catch(() => null);
+        setIsTtsLoading(true);
+        void textToSpeech(reply)
+          .catch(() => null)
+          .finally(() => setIsTtsLoading(false));
       }
     } catch {
       setState((s) => ({ ...s, isLoading: false, error: "Failed to get a response. Please try again." }));
@@ -89,7 +98,16 @@ export function useChat() {
   }, []);
 
   const toggleTts = useCallback(() => {
+    if (ttsEnabledRef.current) {
+      stopTextToSpeechPlayback();
+    }
     setState((s) => ({ ...s, ttsEnabled: !s.ttsEnabled }));
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      stopTextToSpeechPlayback();
+    };
   }, []);
 
   const startRecording = useCallback(async () => {
@@ -158,6 +176,7 @@ export function useChat() {
   return {
     ...state,
     showPulse,
+    isTtsLoading,
     recordedAudio,
     setOpen,
     toggleOpen,

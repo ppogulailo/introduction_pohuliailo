@@ -34,7 +34,7 @@ export default function AboutPage() {
           <div className="flex flex-col gap-16 lg:flex-row lg:items-start lg:gap-20">
             <Reveal>
               <div className="h-72 w-60 shrink-0 overflow-hidden rounded-2xl bg-muted shadow-2xl shadow-foreground/5 sm:h-80 sm:w-64">
-                <img src="/icons/img.png" alt="" />
+                <img src="/icons/Profile.png" alt="" />
               </div>
             </Reveal>
             <div className="flex-1">

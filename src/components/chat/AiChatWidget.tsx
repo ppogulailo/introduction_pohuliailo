@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { AlertTriangle, GripVertical, MessageSquare, MessageSquarePlus, Minimize2, Trash2, Volume2, VolumeX, X } from "lucide-react";
 import { CHAT_CONFIG } from "./chat-config";
 import { useSharedChat } from "./chat-state-context";
@@ -40,6 +41,7 @@ export const AiChatWidget = () => {
   const ctx = useChatContext();
   const isMobile = useIsMobile();
   const panelRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     if (ctx.isOpen && !chat.isOpen) {
@@ -130,6 +132,10 @@ export const AiChatWidget = () => {
     }
   };
 
+  if (pathname === "/ai-chatbot") {
+    return null;
+  }
+
   return (
     <>
       {chat.isOpen && isMobile && <div className="fixed inset-0 z-60 animate-in fade-in-0 bg-foreground/10 backdrop-blur-sm duration-200" onClick={handleClose} aria-hidden />}
@@ -197,7 +203,12 @@ export const AiChatWidget = () => {
             </div>
           )}
 
-          <ChatMessages messages={chat.messages} isLoading={chat.isLoading} ttsEnabled={chat.ttsEnabled} />
+          <ChatMessages
+            messages={chat.messages}
+            isLoading={chat.isLoading}
+            ttsEnabled={chat.ttsEnabled}
+            isTtsLoading={chat.isTtsLoading}
+          />
           <ChatComposer
             onSend={chat.send}
             isLoading={chat.isLoading}

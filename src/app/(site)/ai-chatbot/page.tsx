@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
-import { Brain, HelpCircle, MessageSquare, Shield, Zap } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Brain, HelpCircle, MessageSquare, Shield, Volume2, VolumeX, Zap } from "lucide-react";
 import Container from "@/components/layout/Container";
 import ChatComposer from "@/components/chat/ChatComposer";
 import ChatMessages from "@/components/chat/ChatMessages";
@@ -23,10 +23,20 @@ const faqs = [
 
 export default function AiChatbotPage() {
   const chat = useSharedChat();
+  const [showTtsHint, setShowTtsHint] = useState(false);
 
   useEffect(() => {
     if (!chat.isOpen) chat.setOpen(true);
   }, [chat]);
+
+  useEffect(() => {
+    const key = "ai-chatbot-tts-hint-seen";
+    const hasSeenHint = localStorage.getItem(key);
+    if (!hasSeenHint) {
+      setShowTtsHint(true);
+      localStorage.setItem(key, "1");
+    }
+  }, []);
 
   return (
     <div className="flex flex-1 flex-col" style={{ minHeight: "calc(100vh - 10rem)" }}>
@@ -73,18 +83,58 @@ export default function AiChatbotPage() {
         </aside>
 
         <div className="flex flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-          <div className="flex items-center gap-3 border-b border-border px-4 py-3">
+          <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
               <MessageSquare className="h-4 w-4" />
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-foreground">{CHAT_CONFIG.title}</p>
               <p className="truncate text-xs text-muted-foreground">{CHAT_CONFIG.subtitle}</p>
             </div>
           </div>
 
           <div className="flex flex-1 flex-col overflow-hidden">
-            <ChatMessages messages={chat.messages} isLoading={chat.isLoading} ttsEnabled={chat.ttsEnabled} />
+            <ChatMessages
+              messages={chat.messages}
+              isLoading={chat.isLoading}
+              ttsEnabled={chat.ttsEnabled}
+              isTtsLoading={chat.isTtsLoading}
+            />
+          </div>
+
+          <div className="relative border-t border-border px-4 py-2">
+            {showTtsHint && (
+              <div className="absolute right-4 bottom-12 z-10 max-w-[260px] rounded-md border border-border bg-background px-3 py-2 text-xs text-muted-foreground shadow-lg">
+                Toggle this button to turn AI voice read-aloud on or off.
+                <button
+                  type="button"
+                  onClick={() => setShowTtsHint(false)}
+                  className="ml-2 text-primary hover:underline"
+                >
+                  Got it
+                </button>
+              </div>
+            )}
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={chat.toggleTts}
+                aria-label={chat.ttsEnabled ? "Turn sound read off" : "Turn sound read on"}
+                className="inline-flex items-center gap-1 rounded-md border border-border px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                {chat.ttsEnabled ? (
+                  <>
+                    <Volume2 className="h-3.5 w-3.5" />
+                    Voice On
+                  </>
+                ) : (
+                  <>
+                    <VolumeX className="h-3.5 w-3.5" />
+                    Voice Off
+                  </>
+                )}
+              </button>
+            </div>
           </div>
 
           <ChatComposer

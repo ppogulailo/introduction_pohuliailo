@@ -3,6 +3,25 @@ export type ChatInputMsg = {
   content: string;
 };
 
+let activeAudio: HTMLAudioElement | null = null;
+let activeAudioUrl: string | null = null;
+
+function clearActiveAudio() {
+  if (activeAudio) {
+    activeAudio.pause();
+    activeAudio.currentTime = 0;
+    activeAudio = null;
+  }
+  if (activeAudioUrl) {
+    URL.revokeObjectURL(activeAudioUrl);
+    activeAudioUrl = null;
+  }
+}
+
+export function stopTextToSpeechPlayback() {
+  clearActiveAudio();
+}
+
 export async function sendChatMessage(messages: ChatInputMsg[]): Promise<{ reply: string }> {
   const res = await fetch("/api/chat", {
     method: "POST",
@@ -56,10 +75,28 @@ export async function textToSpeech(text: string): Promise<string | null> {
 
   if (!res.ok) return null;
 
+  // Stop any existing playback before starting a new one.
+  clearActiveAudio();
+
   const blob = await res.blob();
   const url = URL.createObjectURL(blob);
   const audio = new Audio(url);
-  audio.onended = () => URL.revokeObjectURL(url);
+  activeAudio = audio;
+  activeAudioUrl = url;
+  audio.onended = () => {
+    if (activeAudio === audio) {
+      clearActiveAudio();
+    } else {
+      URL.revokeObjectURL(url);
+    }
+  };
+  audio.onerror = () => {
+    if (activeAudio === audio) {
+      clearActiveAudio();
+    } else {
+      URL.revokeObjectURL(url);
+    }
+  };
   await audio.play();
   return url;
 }

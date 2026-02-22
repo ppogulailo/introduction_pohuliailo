@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 
 interface ThemeToggleProps {
@@ -8,7 +9,14 @@ interface ThemeToggleProps {
 
 const ThemeToggle = ({ className = "" }: ThemeToggleProps) => {
   const { resolvedTheme, setTheme } = useTheme();
-  const isDark = resolvedTheme === "dark";
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Keep SSR/CSR output stable until theme is resolved on client.
+  const isDark = mounted && resolvedTheme === "dark";
 
   return (
     <button
