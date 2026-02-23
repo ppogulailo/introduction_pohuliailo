@@ -1,7 +1,7 @@
 "use client";
 
 import { KeyboardEvent, useEffect, useRef, useState } from "react";
-import { Mic, Paperclip, Play, Send, Square, X } from "lucide-react";
+import { Mic, Paperclip, Send, Square, Volume2, VolumeX } from "lucide-react";
 import { CHAT_CONFIG } from "./chat-config";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +16,8 @@ interface ChatComposerProps {
   onStopRecording: () => void;
   onCancelRecording: () => void;
   onSendVoice: () => void;
+  ttsEnabled: boolean;
+  onToggleTts: () => void;
 }
 
 function formatSeconds(s: number): string {
@@ -35,6 +37,8 @@ const ChatComposer = ({
   onStopRecording,
   onCancelRecording,
   onSendVoice,
+  ttsEnabled,
+  onToggleTts,
 }: ChatComposerProps) => {
   const [text, setText] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -46,6 +50,13 @@ const ChatComposer = ({
       ta.style.height = Math.min(ta.scrollHeight, 120) + "px";
     }
   }, [text]);
+
+  // Auto-send voice as soon as recording is ready
+  useEffect(() => {
+    if (recordedAudio && !isLoading) {
+      onSendVoice();
+    }
+  }, [recordedAudio]);
 
   const handleSend = () => {
     if (!text.trim() || isLoading) return;
@@ -83,24 +94,9 @@ const ChatComposer = ({
   if (recordedAudio) {
     return (
       <div className="border-t border-border bg-card px-4 py-3">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => {
-              const audio = new Audio(recordedAudio.url);
-              audio.play();
-            }}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground"
-            aria-label="Play recorded audio"
-          >
-            <Play className="h-3.5 w-3.5" />
-          </button>
-          <span className="flex-1 text-sm text-muted-foreground">Voice message ready</span>
-          <button onClick={onCancelRecording} className="text-muted-foreground hover:text-foreground" aria-label="Cancel voice message">
-            <X className="h-4 w-4" />
-          </button>
-          <button onClick={onSendVoice} disabled={isLoading} className="flex h-8 items-center gap-1 rounded-lg bg-primary px-3 text-xs font-medium text-primary-foreground disabled:opacity-50">
-            <Send className="h-3 w-3" /> Send
-          </button>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <span className="h-2 w-2 animate-pulse rounded-full bg-primary" />
+          <span>Sending voice message…</span>
         </div>
       </div>
     );
@@ -140,6 +136,22 @@ const ChatComposer = ({
 
         <button onClick={handleSend} disabled={!text.trim() || isLoading} aria-label="Send message" className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors", text.trim() ? "bg-primary text-primary-foreground hover:bg-primary/90" : "text-muted-foreground/40")}>
           <Send className="h-4 w-4" />
+        </button>
+      </div>
+
+      <div className="flex items-center justify-end border-t border-border/40 px-3 py-1.5">
+        <button
+          onClick={onToggleTts}
+          aria-label={ttsEnabled ? "Voice off" : "Voice on"}
+          className={cn(
+            "flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors",
+            ttsEnabled
+              ? "bg-primary/10 text-primary hover:bg-primary/20"
+              : "text-muted-foreground/60 hover:text-muted-foreground"
+          )}
+        >
+          {ttsEnabled ? <Volume2 className="h-3 w-3" /> : <VolumeX className="h-3 w-3" />}
+          {ttsEnabled ? "Voice on" : "Voice off"}
         </button>
       </div>
     </div>

@@ -220,6 +220,8 @@ export const AiChatWidget = () => {
             onStopRecording={chat.stopRecording}
             onCancelRecording={chat.cancelRecording}
             onSendVoice={chat.sendVoice}
+            ttsEnabled={chat.ttsEnabled}
+            onToggleTts={chat.toggleTts}
           />
         </div>
       )}

@@ -109,6 +109,33 @@ export default function ProjectsPage() {
             </button>
           </div>
         )}
+
+        {/* "Not all" note */}
+        <Reveal delay={200}>
+          <div className="mt-16 rounded-2xl border border-dashed border-border bg-muted/30 px-8 py-10 text-center">
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary">And more</p>
+            <h3 className="mt-3 text-xl font-semibold text-foreground">These aren't all my projects</h3>
+            <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
+              Over 7+ years I've shipped 50+ products across fintech, crypto, HRTech, EdTech, AgTech, and public health — many under NDA or not yet published. Reach out to discuss what I've built.
+            </p>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
+              <Link
+                href="/contact"
+                className="inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-80"
+              >
+                Get in touch
+              </Link>
+              <a
+                href="https://www.upwork.com/freelancers/pavelp48"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-full border border-border px-6 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+              >
+                View Upwork profile
+              </a>
+            </div>
+          </div>
+        </Reveal>
       </Container>
     </section>
   );

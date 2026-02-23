@@ -26,40 +26,60 @@ async function embed(openai: OpenAI, text: string) {
 }
 
 export async function POST(req: Request) {
+  if (!process.env.OPENAI_API_KEY) {
+    return new Response("OPENAI_API_KEY is not configured.", { status: 503 });
+  }
+
   const openai = getOpenAI();
-  const supabase = getSupabase();
   const { messages } = (await req.json()) as { messages: Msg[] };
   const lastUser = [...messages].reverse().find((m) => m.role === "user")?.content ?? "";
 
-  const queryEmbedding = await embed(openai, lastUser);
+  // Skip vector search if Supabase is not configured — answer from system prompt only.
+  let context = "";
+  if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    const supabase = getSupabase();
+    const queryEmbedding = await embed(openai, lastUser);
 
-  const { data: chunks, error } = await supabase.rpc("match_documents", {
-    query_embedding: queryEmbedding,
-    match_threshold: 0.2,
-    match_count: 6,
-  });
+    const { data: chunks, error } = await supabase.rpc("match_documents", {
+      query_embedding: queryEmbedding,
+      match_threshold: 0.2,
+      match_count: 6,
+    });
 
-  if (error) {
-    return new Response("Vector search error", { status: 500 });
+    if (!error && chunks?.length) {
+      context = chunks
+        .map((c: any, i: number) => {
+          const title = c.metadata?.title ?? "Source";
+          const url = c.metadata?.url ?? c.metadata?.source ?? "local";
+          const page = c.metadata?.page ? ` p.${c.metadata.page}` : "";
+          return `[S${i + 1}] ${title} (${url}${page})\n${c.content}`;
+        })
+        .join("\n\n");
+    }
   }
 
-  const context = (chunks ?? [])
-    .map((c: any, i: number) => {
-      const title = c.metadata?.title ?? "Source";
-      const url = c.metadata?.url ?? c.metadata?.source ?? "local";
-      const page = c.metadata?.page ? ` p.${c.metadata.page}` : "";
-      return `[S${i + 1}] ${title} (${url}${page})\n${c.content}`;
-    })
-    .join("\n\n");
-
   const system = `
-You are a friendly website assistant.
+You are the personal AI assistant on Pavlo Pohuliailo's portfolio website (https://www.pohuliailo.com).
 
-For greetings, thanks, or conversational messages (e.g. "Hello", "Can you hear me?", "What can you do?") reply briefly and naturally-no need to use the knowledge base.
+About Pavlo:
+Pavlo Pohuliailo is a Senior Software Engineer and Team Lead based in Kyiv, Ukraine with 7+ years of experience building scalable web products. He specialises in Next.js/React, Node.js/NestJS, TypeScript, microservices, cloud (AWS/Azure), CI/CD, and authentication systems (SSO/SAML/OIDC, Auth0, Microsoft Entra ID). He is currently a Lead Software Engineer at EPAM Systems and also takes freelance projects on Upwork ($5,000+ earned).
 
-For questions about the website or its content: answer using ONLY the provided context. Add citations like [S1], [S2] next to claims. If the answer is not in the context, say: "I don't have that information in my knowledge base yet."
+Contact & links:
+- Email: pavel.pogulailo@gmail.com
+- Phone: +380 (98) 318 71 34
+- LinkedIn: https://www.linkedin.com/in/pogulailopavel/
+- GitHub: https://github.com/ppogulailo
+- Upwork: https://www.upwork.com/freelancers/pavelp48
+- Portfolio: https://www.pohuliailo.com/
+- Video intro: https://www.youtube.com/watch?v=e9pvT5_ZZ3M
 
-Keep replies concise.
+Your role:
+1. For greetings, thanks, small talk, or general questions like "What can you do?" — reply briefly and naturally. You can introduce yourself as Pavlo's AI assistant.
+2. For questions about Pavlo's skills, experience, projects, availability, or how to hire him — answer using the provided knowledge base context. Cite sources like [S1], [S2] when appropriate.
+3. For questions not covered by the context — give a helpful general answer based on what you know about Pavlo, and suggest the visitor contact him directly via email or LinkedIn for specifics.
+4. Always be professional, concise, and encouraging. Help visitors understand Pavlo's expertise and how to get in touch.
+
+If asked "Who are you?" say: "I'm Pavlo's AI assistant. I can answer questions about his skills, experience, projects, and how to work with him."
   `.trim();
 
   const stream = await openai.chat.completions.create({
