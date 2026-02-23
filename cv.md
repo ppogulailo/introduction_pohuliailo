@@ -39,6 +39,7 @@ Senior Software Engineer and Team Lead with 7+ years of experience building scal
 - PostgreSQL, MongoDB, Redis, Memcached
 - ElasticSearch, Kibana
 - Prisma, TypeORM
+- Supabase (Postgres, Auth, Storage)
 
 ### Cloud & Infrastructure
 - AWS: Lambda, API Gateway, S3, CodeDeploy, CodeBuild, CodePipeline, Elastic Beanstalk, ELB, Route 53, ECR, ECS, CloudFormation, QuickSight
@@ -59,13 +60,18 @@ Senior Software Engineer and Team Lead with 7+ years of experience building scal
 - Jest, WebDriverIO, Artillery.js
 - Observability: Prometheus, Grafana, ELK Stack
 
+### AI & Automation
+- OpenAI APIs (Chat/Assistants, embeddings, function calling, RAG)
+- AI agent development (tooling, workflows, guardrails)
+- Cursor, GitHub Copilot
+- Lovable (rapid UI/app prototyping)
+- Prompt engineering, evaluation/iteration
+
 ### Other Tools
 - Git, CodeCommit, BitBucket
 - Scrum, Agile, Kanban
 - Data Structures & Algorithms
-- Stripe, SendGrid, SumSub, DocuSign, OpenAI APIs
-
----
+- Stripe, SendGrid, SumSub, DocuSign
 
 ## Employment History
 

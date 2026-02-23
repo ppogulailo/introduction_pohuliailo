@@ -67,13 +67,16 @@ export function useChat() {
       }));
       const { reply } = await sendChatMessage(payload);
       const assistantMsg = createMessage("assistant", reply);
-      setState((s) => ({ ...s, messages: [...s.messages, assistantMsg], isLoading: false, unreadCount: s.isOpen ? 0 : s.unreadCount + 1 }));
-      if (state.ttsEnabled) {
+
+      if (ttsEnabledRef.current) {
+        // Show loading indicator while audio is prepared
         setIsTtsLoading(true);
-        void textToSpeech(reply)
-          .catch(() => null)
-          .finally(() => setIsTtsLoading(false));
+        await textToSpeech(reply).catch(() => null);
+        setIsTtsLoading(false);
       }
+
+      // Reveal the message only after audio is ready (or immediately if TTS is off)
+      setState((s) => ({ ...s, messages: [...s.messages, assistantMsg], isLoading: false, unreadCount: s.isOpen ? 0 : s.unreadCount + 1 }));
     } catch {
       setState((s) => ({ ...s, isLoading: false, error: "Failed to get a response. Please try again." }));
     }
@@ -163,6 +166,15 @@ export function useChat() {
     try {
       const { transcript, reply } = await sendVoiceMessage(payload, recordedAudio.blob);
       const transcriptMsg = createMessage("assistant", `*Transcript:* ${transcript}\n\n${reply}`);
+
+      if (ttsEnabledRef.current) {
+        // Show loading indicator while audio is prepared
+        setIsTtsLoading(true);
+        await textToSpeech(reply).catch(() => null);
+        setIsTtsLoading(false);
+      }
+
+      // Reveal the message only after audio is ready (or immediately if TTS is off)
       setState((s) => ({ ...s, messages: [...s.messages, transcriptMsg], isLoading: false }));
     } catch {
       setState((s) => ({ ...s, isLoading: false, error: "Failed to process voice message." }));
